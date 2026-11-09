@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 
 export const metadata: Metadata = {
-  title: "Easy Rider Ops",
+  title: "Yari Ride Ops",
   description: "Server vitals and operations dashboard for Yarri Ride",
 };
 

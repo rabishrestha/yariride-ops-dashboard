@@ -2,7 +2,7 @@
 
 A multi-page server vitals and operations dashboard for **Yarri Ride**, built with Next.js (App Router), Tailwind CSS v4, shadcn/ui, and Recharts.
 
-Visualizes live metrics from the Easy Rider Metrics API — host, APIs, Postgres, Redis, RabbitMQ, Cloudflare Tunnel, Docker containers, security events — plus a dedicated API health page that probes `api.yariride.com/health` and `api-test.yariride.com/health` side by side.
+Visualizes live metrics from the Yari Ride Metrics API — host, APIs, Postgres, Redis, RabbitMQ, Cloudflare Tunnel, Docker containers, security events — plus a dedicated API health page that probes `api.yariride.com/health` and `api-test.yariride.com/health` side by side.
 
 ---
 

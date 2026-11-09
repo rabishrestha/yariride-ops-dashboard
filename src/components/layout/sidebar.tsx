@@ -24,7 +24,7 @@ export function Sidebar() {
     <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:bg-background">
       <div className="flex h-16 items-center gap-2 border-b px-6">
         <Activity className="h-5 w-5 text-primary" />
-        <span className="font-semibold tracking-tight">Easy Rider Ops</span>
+        <span className="font-semibold tracking-tight">Yari Ride Ops</span>
       </div>
       <nav className="flex-1 space-y-1 p-4">
         {nav.map(({ href, label, icon: Icon }) => {
