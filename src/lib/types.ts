@@ -55,3 +55,32 @@ export interface Snapshot {
 }
 
 export type Status = "ok" | "warn" | "error" | "unknown";
+
+export interface HealthCheck {
+  status: string;
+  message: string;
+  duration: number; // nanoseconds
+  metadata?: Record<string, unknown>;
+  timestamp: string;
+}
+
+export interface HealthPayload {
+  env: "prod" | "test";
+  status: "healthy" | "degraded" | "unhealthy" | "critical" | "unreachable";
+  http_status?: number;
+  version?: string;
+  uptime?: number;
+  timestamp?: string;
+  checks?: Record<string, HealthCheck>;
+  summary?: {
+    total: number;
+    healthy: number;
+    degraded: number;
+    unhealthy: number;
+    critical: number;
+  };
+  metadata?: { cache_ttl?: string; check_duration?: string };
+  elapsed_ms: number;
+  checked_at: string;
+  error?: string;
+}
