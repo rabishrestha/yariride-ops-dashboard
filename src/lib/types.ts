@@ -84,3 +84,27 @@ export interface HealthPayload {
   checked_at: string;
   error?: string;
 }
+
+export interface HealthSummary {
+  total: number;
+  healthy: number;
+  degraded: number;
+  unhealthy: number;
+  critical: number;
+}
+
+export interface HealthRedisInfo {
+  used_memory: number;
+  used_memory_human: string;
+  used_memory_peak: number;
+  used_memory_peak_perc: string;
+  used_memory_rss: number;
+  mem_fragmentation_ratio: number;
+  mem_clients_normal: number;
+  mem_clients_slaves: number;
+  maxmemory: number;
+  maxmemory_human: string;
+  maxmemory_policy: string;
+  allocator_frag_ratio: number;
+  active_defrag_running: number;
+}
