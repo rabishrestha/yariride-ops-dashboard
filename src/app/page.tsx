@@ -1,10 +1,10 @@
 "use client";
+import React, { useEffect } from "react";
 import {
   Activity,
   Database,
   Cloud,
   RadioTower,
-  Server,
 } from "lucide-react";
 import { useLatest, useSampledHistory } from "@/lib/hooks";
 import { StatusTile } from "@/components/status-tile";
@@ -18,18 +18,52 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   parseUsedTotal,
   parseDiskPct,
-  timeLabel,
   statusFromString,
 } from "@/lib/parse";
 
 export default function OverviewPage() {
   const { data: latest, error, isLoading } = useLatest();
-  const { data: history } = useSampledHistory(24, 5);
+  const { data: history } = useSampledHistory(24, 1);
 
-  if (error) {
+  // Convert all timestamps to Unix milliseconds for Recharts
+  const memPoints =
+    history?.map((s) => ({
+      t: new Date(s.timestamp).getTime(),
+      host: +parseUsedTotal(s.host.mem).used.toFixed(0),
+      prod: s.api?.prod?.mem_mb ?? 0,
+      test: s.api?.test?.mem_mb ?? 0,
+    })) ?? [];
+
+  const latencyPoints =
+    history?.map((s) => ({
+      t: new Date(s.timestamp).getTime(),
+      edge: s.cloudflare_latency?.prod_ttfb_ms ?? 0,
+      origin: s.api?.prod?.http_time_ms ?? 0,
+    })) ?? [];
+
+  const diskPoints =
+    history?.map((s) => ({
+      t: new Date(s.timestamp).getTime(),
+      root: +parseDiskPct(s.host.disk_root).pct.toFixed(1),
+      opt: +parseDiskPct(s.host.disk_opt).pct.toFixed(1),
+    })) ?? [];
+
+  // --- DEBUG BLOCK ---
+  useEffect(() => {
+    if (history && history.length > 0) {
+      console.log("=== CHART DATA DEBUG ===");
+      console.log("Total points in history:", history.length);
+      console.log("First point:", new Date(history[0].timestamp).toLocaleTimeString());
+      console.log("Last point:", new Date(history[history.length - 1].timestamp).toLocaleTimeString());
+      console.log("Mapped memPoints last item:", memPoints[memPoints.length - 1]);
+    }
+  }, [history, memPoints]);
+  // -------------------
+
+  if (error && !latest) {
     return (
       <p className="text-red-500">
-        Failed to load metrics: {(error as Error).message}
+        Failed to load initial metrics: {(error as Error).message}
       </p>
     );
   }
@@ -48,29 +82,7 @@ export default function OverviewPage() {
     );
   }
 
-  const memPoints =
-    history?.map((s) => ({
-      t: timeLabel(s.timestamp),
-      host: +parseUsedTotal(s.host.mem).used.toFixed(0),
-      prod: s.api?.prod?.mem_mb ?? 0,
-      test: s.api?.test?.mem_mb ?? 0,
-    })) ?? [];
-
-  const latencyPoints =
-    history?.map((s) => ({
-      t: timeLabel(s.timestamp),
-      edge: s.cloudflare_latency?.prod_ttfb_ms ?? 0,
-      origin: s.api?.prod?.http_time_ms ?? 0,
-    })) ?? [];
-
-  const diskPoints =
-    history?.map((s) => ({
-      t: timeLabel(s.timestamp),
-      root: +parseDiskPct(s.host.disk_root).pct.toFixed(1),
-      opt: +parseDiskPct(s.host.disk_opt).pct.toFixed(1),
-    })) ?? [];
-
-  const highLatency = latest.cloudflare_latency?.prod_ttfb_ms > 2000;
+  const highLatency = (latest.cloudflare_latency?.prod_ttfb_ms ?? 0) > 2000;
   const diskPct = parseDiskPct(latest.host.disk_root).pct;
   const anyRestarts =
     (latest.api?.prod?.restarts ?? 0) > 0 || (latest.api?.test?.restarts ?? 0) > 0;

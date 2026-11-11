@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatInTimeZone } from "date-fns-tz";
 
 export interface ChartPoint {
-  t: string;
+  t: string | number; // <-- Updated to accept both string and number
   [key: string]: string | number;
 }
 
@@ -33,22 +33,21 @@ export function LineChartCard({
   yDomain?: [number | "auto", number | "auto"];
 }) {
   // Format time strings for the X-Axis (e.g., "16:20")
-  const formatXAxis = (tickItem: string) => {
+  const formatXAxis = (tickItem: string | number) => {
     if (!tickItem) return "";
     try {
+      // new Date() handles both ISO strings and Unix timestamps correctly
       return formatInTimeZone(new Date(tickItem), TZ, "HH:mm");
     } catch {
-      return tickItem;
+      return String(tickItem);
     }
   };
 
   // Format tooltips to show full date & time with NPT label
-  // Accept ReactNode to satisfy Recharts types, then safely cast to string
   const formatTooltipLabel = (label: React.ReactNode) => {
     const labelStr = String(label ?? "");
     if (!labelStr) return "";
     try {
-      // Some charts pass the index; ensure it's parseable as a date
       const date = new Date(labelStr);
       if (isNaN(date.getTime())) return labelStr;
       return formatInTimeZone(date, TZ, "MMM d, HH:mm") + " NPT";
@@ -66,17 +65,18 @@ export function LineChartCard({
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-            
-            {/* X-Axis: Convert UTC to NPT */}
+
             <XAxis
               dataKey="t"
               fontSize={11}
               tickMargin={8}
               minTickGap={24}
               tickFormatter={formatXAxis}
+              type="number"
+              domain={["auto", "auto"]}   // <-- Changed from dataMin/dataMax to auto
+              scale="time"
             />
 
-            {/* Y-Axis */}
             <YAxis
               fontSize={11}
               domain={yDomain ?? ["auto", "auto"]}
@@ -84,7 +84,6 @@ export function LineChartCard({
               width={50}
             />
 
-            {/* Tooltip: Convert UTC to NPT and label it clearly */}
             <Tooltip
               contentStyle={{ fontSize: 12, borderRadius: 8 }}
               labelFormatter={formatTooltipLabel}
@@ -102,7 +101,7 @@ export function LineChartCard({
                 height={24}
               />
             )}
-            
+
             {series.map((s) => (
               <Line
                 key={s.key}

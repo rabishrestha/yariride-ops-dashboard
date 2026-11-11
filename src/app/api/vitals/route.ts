@@ -27,7 +27,14 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(await res.json());
+    const data = await res.json();
+    return NextResponse.json(data, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "fetch failed" },

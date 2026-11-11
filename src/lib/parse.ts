@@ -1,4 +1,6 @@
 export function parseUsedTotal(value: string) {
+  if (!value) return { used: 0, total: 0, pct: 0 };
+  // Matches "1072 / 7937 MB" or "1072/7937"
   const m = value.match(/([\d.]+)\s*\/\s*([\d.]+)/);
   if (!m) return { used: 0, total: 0, pct: 0 };
   const used = parseFloat(m[1]);
@@ -7,21 +9,17 @@ export function parseUsedTotal(value: string) {
 }
 
 export function parseDiskPct(value: string) {
-  const m = value.match(/([\d.]+)G\s*\/\s*([\d.]+)G/);
+  if (!value) return { used: 0, total: 0, pct: 0 };
+  // Matches "22G / 48G (48%)" or "22 / 48"
+  const m = value.match(/([\d.]+)G?\s*\/\s*([\d.]+)G?/);
   const used = m ? parseFloat(m[1]) : 0;
   const total = m ? parseFloat(m[2]) : 0;
   return { used, total, pct: total ? (used / total) * 100 : 0 };
 }
 
 export function parseLoad1(value: string) {
+  if (!value) return 0;
   return parseFloat(value.split(",")[0].trim()) || 0;
-}
-
-export function timeLabel(ts: string) {
-  return new Date(ts).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function statusFromString(s: string | undefined): "ok" | "warn" | "error" | "unknown" {
